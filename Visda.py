@@ -1,6 +1,4 @@
 import numpy as np
-import tensorflow as tf
-import tensorlayer as tl
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -50,8 +48,8 @@ while k < 2800:
         label_source_0 = Variable(torch.from_numpy(label_source)).cuda()
         feature_fooling = Variable(torch.from_numpy(im_target).cuda(),requires_grad = True)
         feature_fooling_c = Variable(torch.from_numpy(im_source).cuda(),requires_grad = True)
-		feature_fooling_0 = feature_fooling.detach()
-		feature_fooling_c1 = feature_fooling_c.detach()
+        feature_fooling_0 = feature_fooling.detach()
+        feature_fooling_c1 = feature_fooling_c.detach()
 		
         for i in range(20):
             scores = discriminator(feature_fooling)

@@ -1,6 +1,6 @@
 import numpy as np
-import tensorflow as tf
-import tensorlayer as tl
+# import tensorflow as tf
+# import tensorlayer as tl
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -130,94 +130,94 @@ def setGPU(i):
     print('gpu(s) to be used: %s'%str(gpus))
     return NGPU
 
-class Logger(object):
-    def __init__(self, log_dir, clear=False):
-        if clear:
-            os.system('rm %s -r'%log_dir)
-        tl.files.exists_or_mkdir(log_dir)
-        self.writer = tf.summary.FileWriter(log_dir)
-        self.step = 0
-        self.log_dir = log_dir
+# class Logger(object):
+#     def __init__(self, log_dir, clear=False):
+#         if clear:
+#             os.system('rm %s -r'%log_dir)
+#         tl.files.exists_or_mkdir(log_dir)
+#         self.writer = tf.summary.FileWriter(log_dir)
+#         self.step = 0
+#         self.log_dir = log_dir
 
-    def log_scalar(self, tag, value, step = None):
-        if not step:
-            step = self.step
-        summary = tf.Summary(value = [tf.Summary.Value(tag = tag,
-                                                     simple_value = value)])
-        self.writer.add_summary(summary, step)
-        self.writer.flush()
+#     def log_scalar(self, tag, value, step = None):
+#         if not step:
+#             step = self.step
+#         summary = tf.Summary(value = [tf.Summary.Value(tag = tag,
+#                                                      simple_value = value)])
+#         self.writer.add_summary(summary, step)
+#         self.writer.flush()
 
-    def log_images(self, tag, images, step = None):
-        if not step:
-            step = self.step
+#     def log_images(self, tag, images, step = None):
+#         if not step:
+#             step = self.step
         
-        im_summaries = []
-        for nr, img in enumerate(images):
-            s = StringIO()
+#         im_summaries = []
+#         for nr, img in enumerate(images):
+#             s = StringIO()
             
-            if len(img.shape) == 2:
-                img = np.expand_dims(img, axis=-1)
+#             if len(img.shape) == 2:
+#                 img = np.expand_dims(img, axis=-1)
             
-            if img.shape[-1] == 1:
-                img = np.tile(img, [1, 1, 3])
-            img = to_rgb_np(img)
-            plt.imsave(s, img, format = 'png')
+#             if img.shape[-1] == 1:
+#                 img = np.tile(img, [1, 1, 3])
+#             img = to_rgb_np(img)
+#             plt.imsave(s, img, format = 'png')
 
-            img_sum = tf.Summary.Image(encoded_image_string = s.getvalue(),
-                                       height = img.shape[0],
-                                       width = img.shape[1])
-            im_summaries.append(tf.Summary.Value(tag = '%s/%d' % (tag, nr),
-                                                 image = img_sum))
-        summary = tf.Summary(value = im_summaries)
-        self.writer.add_summary(summary, step)
-        self.writer.flush()
+#             img_sum = tf.Summary.Image(encoded_image_string = s.getvalue(),
+#                                        height = img.shape[0],
+#                                        width = img.shape[1])
+#             im_summaries.append(tf.Summary.Value(tag = '%s/%d' % (tag, nr),
+#                                                  image = img_sum))
+#         summary = tf.Summary(value = im_summaries)
+#         self.writer.add_summary(summary, step)
+#         self.writer.flush()
 
-    def log_histogram(self, tag, values, step = None, bins = 1000):
-        if not step:
-            step = self.step
-        values = np.array(values)
-        counts, bin_edges = np.histogram(values, bins=bins)
-        hist = tf.HistogramProto()
-        hist.min = float(np.min(values))
-        hist.max = float(np.max(values))
-        hist.num = int(np.prod(values.shape))
-        hist.sum = float(np.sum(values))
-        hist.sum_squares = float(np.sum(values**2))
-        for edge in bin_edges:
-            hist.bucket_limit.append(edge)
-        for c in counts:
-            hist.bucket.append(c)
+#     def log_histogram(self, tag, values, step = None, bins = 1000):
+#         if not step:
+#             step = self.step
+#         values = np.array(values)
+#         counts, bin_edges = np.histogram(values, bins=bins)
+#         hist = tf.HistogramProto()
+#         hist.min = float(np.min(values))
+#         hist.max = float(np.max(values))
+#         hist.num = int(np.prod(values.shape))
+#         hist.sum = float(np.sum(values))
+#         hist.sum_squares = float(np.sum(values**2))
+#         for edge in bin_edges:
+#             hist.bucket_limit.append(edge)
+#         for c in counts:
+#             hist.bucket.append(c)
             
-        summary = tf.Summary(value=[tf.Summary.Value(tag=tag, histo=hist)])
-        self.writer.add_summary(summary, step)
-        self.writer.flush()
+#         summary = tf.Summary(value=[tf.Summary.Value(tag=tag, histo=hist)])
+#         self.writer.add_summary(summary, step)
+#         self.writer.flush()
 
-    def log_bar(self, tag, values, xs = None, step = None):
-        if not step:
-            step = self.step
+#     def log_bar(self, tag, values, xs = None, step = None):
+#         if not step:
+#             step = self.step
 
-        values = np.asarray(values).flatten()
-        if not xs:
-            axises = list(range(len(values)))
-        else:
-            axises = xs
-        hist = tf.HistogramProto()
-        hist.min = float(min(axises))
-        hist.max = float(max(axises))
-        hist.num = sum(values)
-        hist.sum = sum([y * x for (x, y) in zip(axises, values)])
-        hist.sum_squares = sum([y * (x ** 2) for (x, y) in zip(axises, values)])
+#         values = np.asarray(values).flatten()
+#         if not xs:
+#             axises = list(range(len(values)))
+#         else:
+#             axises = xs
+#         hist = tf.HistogramProto()
+#         hist.min = float(min(axises))
+#         hist.max = float(max(axises))
+#         hist.num = sum(values)
+#         hist.sum = sum([y * x for (x, y) in zip(axises, values)])
+#         hist.sum_squares = sum([y * (x ** 2) for (x, y) in zip(axises, values)])
 
-        for edge in axises:
-            hist.bucket_limit.append(edge - 1e-10)
-            hist.bucket_limit.append(edge + 1e-10)
-        for c in values:
-            hist.bucket.append(0)
-            hist.bucket.append(c)
+#         for edge in axises:
+#             hist.bucket_limit.append(edge - 1e-10)
+#             hist.bucket_limit.append(edge + 1e-10)
+#         for c in values:
+#             hist.bucket.append(0)
+#             hist.bucket.append(c)
 
-        summary = tf.Summary(value=[tf.Summary.Value(tag=tag, histo=hist)])
-        self.writer.add_summary(summary, self.step)
-        self.writer.flush()
+#         summary = tf.Summary(value=[tf.Summary.Value(tag=tag, histo=hist)])
+#         self.writer.add_summary(summary, self.step)
+#         self.writer.flush()
 
 class AccuracyCounter:
     def __init__(self):
@@ -302,3 +302,27 @@ def EntropyLoss(predict_prob, class_level_weight=None, instance_level_weight=Non
 
     entropy = -predict_prob*torch.log(predict_prob + epsilon)
     return torch.sum(instance_level_weight * entropy * class_level_weight) / float(N)
+
+def MSELoss(label, predict, class_level_weight=None, instance_level_weight=None):
+    N, C = label.size()
+    N_, C_ = predict.size()
+
+    assert N == N_ and C == C_, 'fatal error: dimension mismatch!'
+
+    if class_level_weight is None:
+        class_level_weight = 1.0
+    else:
+        if len(class_level_weight.size()) == 1:
+            class_level_weight = class_level_weight.view(1, class_level_weight.size(0))
+        assert class_level_weight.size(1) == C, 'fatal error: dimension mismatch!'
+
+    if instance_level_weight is None:
+        instance_level_weight = 1.0
+    else:
+        if len(instance_level_weight.size()) == 1:
+            instance_level_weight = instance_level_weight.view(instance_level_weight.size(0), 1)
+        assert instance_level_weight.size(0) == N, 'fatal error: dimension mismatch!'
+
+    mse = (label - predict) ** 2
+    return torch.sum(instance_level_weight * mse * class_level_weight) / float(N)
+
