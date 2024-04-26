@@ -11,13 +11,13 @@ from networks import *
 import scipy.io as sio
 from sklearn.preprocessing import StandardScaler
 
-# log = Logger('log/sentiment-msda', clear=True)
 cls = CLS(15, 1, bottle_neck_dim = 128).cuda()
 discriminator = LargeDiscriminator(15).cuda()
+
 scheduler = lambda step, initial_lr : inverseDecaySheduler(step, initial_lr, gamma=10, power=0.75, max_iter=3000)
-optimizer_cls = OptimWithSheduler(optim.Adam(cls.parameters(), weight_decay = 5e-4, lr = 5e-5),
+optimizer_cls = OptimWithSheduler(optim.Adam(cls.parameters(), weight_decay = 1e-4, lr = 1e-3),
                                   scheduler)
-optimizer_discriminator = OptimWithSheduler(optim.Adam(discriminator.parameters(), weight_decay = 5e-4, lr = 5e-5),
+optimizer_discriminator = OptimWithSheduler(optim.Adam(discriminator.parameters(), weight_decay = 1e-4, lr = 1e-3),
                                   scheduler)
 
 
